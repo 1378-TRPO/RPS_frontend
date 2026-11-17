@@ -1,4 +1,4 @@
-import { Alert, Button, Paper, Stack, Text, TextInput, Title } from '@mantine/core';
+import { Alert, Button, Paper, Stack, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconCheck, IconDeviceFloppy } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -91,9 +91,7 @@ export function ProfilePage() {
         return (
             <div className={styles.page}>
                 <Alert color="yellow" variant="light" icon={<IconAlertCircle size={16} />}>
-                    {status === 403
-                        ? 'Профиль с именем и телефоном доступен только роли client. Для вашей роли используйте данные учетной записи.'
-                        : 'Не удалось загрузить профиль.'}
+                    {status === 403 ? 'Доступно только клиентам' : 'Не удалось загрузить профиль'}
                 </Alert>
             </div>
         );
@@ -103,12 +101,7 @@ export function ProfilePage() {
         <div className={styles.page}>
             <Paper className={styles.card} p="xl" radius="lg" shadow="sm">
                 <Stack gap="lg">
-                    <div>
-                        <Title order={2}>Профиль</Title>
-                        <Text c="dimmed" size="sm" mt={6}>
-                            Имя, телефон и email. Пароль и роль здесь не меняются.
-                        </Text>
-                    </div>
+                    <Title order={2}>Профиль</Title>
 
                     {error ? (
                         <Alert color="red" variant="light" icon={<IconAlertCircle size={16} />}>

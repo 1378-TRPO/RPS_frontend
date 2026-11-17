@@ -74,10 +74,6 @@ export function LoginPage() {
                         <Title order={2} mt={4}>
                             Вход
                         </Title>
-                        <Text c="dimmed" size="sm" mt={6}>
-                            Вход по email и паролю для ролей клиент, механик и менеджер. После входа
-                            выдается JWT access token.
-                        </Text>
                     </div>
 
                     {registeredNotice ? (
@@ -88,7 +84,7 @@ export function LoginPage() {
                             onClose={() => setRegisteredNotice(false)}
                             withCloseButton
                         >
-                            Аккаунт создан. Войдите с тем же email и паролем.
+                            Аккаунт создан
                         </Alert>
                     ) : null}
 

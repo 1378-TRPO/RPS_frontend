@@ -18,7 +18,8 @@
 }
 
 .brand {
-    font-family: var(--rps-font-display);
+    font-family: var(--rps-font-sans);
     letter-spacing: 0.02em;
     color: var(--rps-ink);
+    font-weight: 700;
 }

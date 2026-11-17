@@ -36,8 +36,8 @@
     --rps-radius-md: 16px;
     --rps-radius-lg: 24px;
 
-    --rps-font-sans: 'Outfit', 'Segoe UI', sans-serif;
-    --rps-font-display: 'Source Serif 4', 'Georgia', serif;
+    --rps-font-sans: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+    --rps-font-display: 'IBM Plex Sans', 'Segoe UI', sans-serif;
 
     color-scheme: light;
 }

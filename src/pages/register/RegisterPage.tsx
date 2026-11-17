@@ -21,7 +21,6 @@ import { authService } from '@/services/authService';
 import {
     normalizeEmail,
     PASSWORD_MAX_LENGTH,
-    PASSWORD_MIN_LENGTH,
     validateEmail,
     validatePassword,
 } from '@/utils/authValidation';
@@ -79,10 +78,6 @@ export function RegisterPage() {
                         <Title order={2} mt={4}>
                             Регистрация
                         </Title>
-                        <Text c="dimmed" size="sm" mt={6}>
-                            Создается аккаунт клиента по email и паролю. После регистрации нужно
-                            войти.
-                        </Text>
                     </div>
 
                     {error ? (
@@ -117,8 +112,7 @@ export function RegisterPage() {
                             />
                             <PasswordInput
                                 label="Пароль"
-                                description={`${PASSWORD_MIN_LENGTH}-${PASSWORD_MAX_LENGTH} символов`}
-                                placeholder="Придумайте пароль"
+                                placeholder="Пароль"
                                 autoComplete="new-password"
                                 maxLength={PASSWORD_MAX_LENGTH}
                                 {...form.getInputProps('password')}

@@ -34,10 +34,10 @@ export const mantineTheme = createTheme({
         mist,
         clay,
     },
-    fontFamily: "Outfit, 'Segoe UI', sans-serif",
+    fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif",
     fontFamilyMonospace: "ui-monospace, 'Cascadia Code', Consolas, monospace",
     headings: {
-        fontFamily: "'Source Serif 4', Georgia, serif",
+        fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif",
         fontWeight: '600',
         sizes: {
             h1: { fontSize: '2.25rem', lineHeight: '1.2' },
