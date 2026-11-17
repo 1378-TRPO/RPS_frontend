@@ -3,6 +3,7 @@ import { Notifications } from '@mantine/notifications';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { AppShell } from '@/layout/AppShell';
+import { ClientOnlyRoute } from '@/layout/ClientOnlyRoute';
 import { ProtectedRoute } from '@/layout/ProtectedRoute';
 import { PublicOnlyRoute } from '@/layout/PublicOnlyRoute';
 import { HomePage } from '@/pages/home/HomePage';
@@ -29,7 +30,9 @@ function ThemedApp() {
                     <Route element={<ProtectedRoute />}>
                         <Route element={<AppShell />}>
                             <Route path="/" element={<HomePage />} />
-                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route element={<ClientOnlyRoute />}>
+                                <Route path="/profile" element={<ProfilePage />} />
+                            </Route>
                         </Route>
                     </Route>
 
