@@ -10,28 +10,37 @@ import {
     Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconAlertCircle, IconLogin2 } from '@tabler/icons-react';
+import { IconAlertCircle, IconCheck, IconLogin2 } from '@tabler/icons-react';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+import styles from '@/pages/auth/AuthPage.module.css';
 import { authService } from '@/services/authService';
+import { normalizeEmail, validateEmail, validatePassword } from '@/utils/authValidation';
 
-import styles from './LoginPage.module.css';
+type LoginLocationState = {
+    registered?: boolean;
+    registeredEmail?: string;
+};
 
 export function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const locationState = (location.state as LoginLocationState | null) ?? null;
+
     const [error, setError] = useState<string | null>(null);
+    const [registeredNotice, setRegisteredNotice] = useState(Boolean(locationState?.registered));
 
     const form = useForm({
         initialValues: {
-            email: '',
+            email: locationState?.registeredEmail ?? '',
             password: '',
         },
         validate: {
-            email: (value) => (/^\S+@\S+\.\S+$/.test(value) ? null : 'Введите корректный email'),
-            password: (value) => (value.length >= 8 ? null : 'Минимум 8 символов'),
+            email: validateEmail,
+            password: validatePassword,
         },
     });
 
@@ -43,6 +52,10 @@ export function LoginPage() {
         onError: (err: unknown) => {
             if (axios.isAxiosError(err) && err.response?.status === 401) {
                 setError('Неверный email или пароль');
+                return;
+            }
+            if (axios.isAxiosError(err) && err.response?.status === 422) {
+                setError('Проверьте email и пароль');
                 return;
             }
             setError('Не удалось войти. Попробуйте еще раз.');
@@ -63,6 +76,18 @@ export function LoginPage() {
                         </Text>
                     </div>
 
+                    {registeredNotice ? (
+                        <Alert
+                            color="teal"
+                            variant="light"
+                            icon={<IconCheck size={16} />}
+                            onClose={() => setRegisteredNotice(false)}
+                            withCloseButton
+                        >
+                            Аккаунт создан. Войдите с тем же email и паролем.
+                        </Alert>
+                    ) : null}
+
                     {error ? (
                         <Alert
                             color="red"
@@ -78,7 +103,10 @@ export function LoginPage() {
                     <form
                         onSubmit={form.onSubmit((values) => {
                             setError(null);
-                            loginMutation.mutate(values);
+                            loginMutation.mutate({
+                                email: normalizeEmail(values.email),
+                                password: values.password,
+                            });
                         })}
                     >
                         <Stack gap="md">
@@ -86,12 +114,14 @@ export function LoginPage() {
                                 label="Email"
                                 placeholder="client@example.com"
                                 autoComplete="email"
+                                maxLength={254}
                                 {...form.getInputProps('email')}
                             />
                             <PasswordInput
                                 label="Пароль"
                                 placeholder="Ваш пароль"
                                 autoComplete="current-password"
+                                maxLength={128}
                                 {...form.getInputProps('password')}
                             />
                             <Button
