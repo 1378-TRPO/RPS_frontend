@@ -1,13 +1,17 @@
-import { AppShell as MantineAppShell, Burger, Group, Text } from '@mantine/core';
+import { AppShell as MantineAppShell, Badge, Burger, Group, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconCarGarage } from '@tabler/icons-react';
 import { Outlet } from 'react-router-dom';
+
+import { useMe } from '@/queries/useMe';
+import { ROLE_LABELS } from '@/utils/roles';
 
 import { AppNav } from './AppNav';
 import styles from './AppShell.module.css';
 
 export function AppShell() {
     const [opened, { toggle }] = useDisclosure();
+    const { data: me } = useMe();
 
     return (
         <MantineAppShell
@@ -31,6 +35,17 @@ export function AppShell() {
                             </Text>
                         </Group>
                     </Group>
+
+                    {me ? (
+                        <Group gap="sm" visibleFrom="xs">
+                            <Text size="sm" c="dimmed" lineClamp={1} maw={220}>
+                                {me.email}
+                            </Text>
+                            <Badge variant="light" color="mist" radius="md">
+                                {ROLE_LABELS[me.role]}
+                            </Badge>
+                        </Group>
+                    ) : null}
                 </Group>
             </MantineAppShell.Header>
 

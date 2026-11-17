@@ -12,6 +12,11 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
+    if (!tokenStorage.isAccessValid()) {
+        tokenStorage.clear();
+        return config;
+    }
+
     const token = tokenStorage.getAccessToken();
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -24,7 +29,7 @@ api.interceptors.response.use(
     (error: unknown) => {
         if (axios.isAxiosError(error) && error.response?.status === 401) {
             tokenStorage.clear();
-            if (window.location.pathname !== '/login') {
+            if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
                 window.location.assign('/login');
             }
         }

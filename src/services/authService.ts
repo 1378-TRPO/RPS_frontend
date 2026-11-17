@@ -21,7 +21,7 @@ export type UpdateProfilePayload = {
 
 export const authService = {
     isAuthenticated(): boolean {
-        return Boolean(tokenStorage.getAccessToken());
+        return tokenStorage.isAccessValid();
     },
 
     async register(payload: RegisterPayload): Promise<RegisterResponse> {
@@ -31,7 +31,7 @@ export const authService = {
 
     async login(payload: LoginPayload): Promise<LoginResponse> {
         const { data } = await api.post<LoginResponse>('/auth/login', payload);
-        tokenStorage.setAccessToken(data.access_token);
+        tokenStorage.setSession(data.access_token, data.expires_in);
         return data;
     },
 

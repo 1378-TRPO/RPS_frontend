@@ -6,6 +6,7 @@ export function ProtectedRoute() {
     const location = useLocation();
 
     if (!authService.isAuthenticated()) {
+        authService.logout();
         return <Navigate to="/login" replace state={{ from: location.pathname }} />;
     }
 
