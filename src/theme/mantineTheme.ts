@@ -1,5 +1,7 @@
 import { createTheme, type MantineColorsTuple } from '@mantine/core';
 
+import { PasswordVisibilityIcon } from '@/components/PasswordVisibilityIcon';
+
 /** Пастельный dusty-teal, зеркало --rps-primary* */
 const mist: MantineColorsTuple = [
     '#f3f7f9',
@@ -75,7 +77,15 @@ export const mantineTheme = createTheme({
         PasswordInput: {
             defaultProps: {
                 radius: 'md',
+                visibilityToggleIcon: PasswordVisibilityIcon,
+                rightSectionWidth: 36,
             },
+            vars: () => ({
+                root: {
+                    '--psi-icon-size': '16px',
+                    '--psi-button-size': '28px',
+                },
+            }),
         },
         Paper: {
             defaultProps: {
