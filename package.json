@@ -12,7 +12,9 @@
         "format": "prettier --write .",
         "format:check": "prettier --check .",
         "typecheck": "tsc -b",
-        "check": "npm run typecheck && npm run lint && npm run format:check"
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
     },
     "dependencies": {
         "@mantine/core": "^9.8.1",
@@ -44,6 +46,7 @@
         "prettier": "^3.9.6",
         "typescript": "~6.0.2",
         "typescript-eslint": "^8.59.2",
-        "vite": "^8.0.12"
+        "vite": "^8.0.12",
+        "vitest": "^5.1.0"
     }
 }

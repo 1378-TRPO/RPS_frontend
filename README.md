@@ -39,7 +39,7 @@
 - Регистрация клиента по email и паролю (`/register` → `POST /auth/register`)
 - Вход по JWT для ролей client / mechanic / manager (`/login` → `POST /auth/login`)
 - Текущая учетка и актуальная роль из `/auth/me`
-- Профиль клиента: имя, телефон, email (пункт меню только у client)
+- Профиль клиента: имя, телефон, email (`GET/PATCH /users/me`, только client)
 - Светлая/темная тема через `data-theme` (system / light / dark)
 - Адаптивный кабинет (desktop + mobile navbar)
 
@@ -68,6 +68,7 @@ npm run preview
 npm run typecheck
 npm run lint
 npm run format
+npm test
 npm run check
 ```
 
@@ -95,11 +96,12 @@ src/
 
 ## Agile и Git
 
-| Задача          | Ветка                      | Оценка      |
-| --------------- | -------------------------- | ----------- |
-| Основа фронта   | `chore/frontend-setup`     | Техническая |
-| 1.1 Регистрация | `feature/1.1-registration` | 2 SP        |
-| 1.2 JWT и роли  | `feature/1.2-jwt-auth`     | 3 SP        |
+| Задача          | Ветка                        | Оценка      |
+| --------------- | ---------------------------- | ----------- |
+| Основа фронта   | `chore/frontend-setup`       | Техническая |
+| 1.1 Регистрация | `feature/1.1-registration`   | 2 SP        |
+| 1.2 JWT и роли  | `feature/1.2-jwt-auth`       | 3 SP        |
+| 1.3 Профиль     | `feature/1.3-client-profile` | 1 SP        |
 
 Следующую ветку создаем от обновленной `main` после review и слияния предыдущего PR.
 Формат веток: `feature/N.N-short-name`, `fix/...`, `chore/...`.
@@ -109,6 +111,7 @@ src/
 Шаблон: `.github/pull_request_template.md`.
 Текст PR регистрации: `docs/pr/1.1-registration.md`.
 Текст PR JWT: `docs/pr/1.2-jwt-auth.md`.
+Текст PR профиля: `docs/pr/1.3-client-profile.md`.
 
 ## Docker
 
