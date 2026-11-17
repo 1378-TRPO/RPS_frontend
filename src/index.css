@@ -1,0 +1,44 @@
+@import './theme/tokens.css';
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family: var(--rps-font-sans);
+    font-weight: 500;
+    color: var(--rps-ink);
+    background: var(--rps-bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+a {
+    color: inherit;
+}
+
+button,
+input,
+textarea {
+    font: inherit;
+}
+
+:focus-visible {
+    outline: 2px solid var(--rps-primary);
+    outline-offset: 2px;
+}
+
+@media (max-width: 48em) {
+    body {
+        font-size: 15px;
+    }
+}

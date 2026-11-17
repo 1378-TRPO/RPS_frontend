@@ -1,0 +1,24 @@
+.shell {
+    min-height: 100dvh;
+    background:
+        radial-gradient(1200px 500px at 10% -10%, var(--rps-primary-soft), transparent 55%),
+        radial-gradient(900px 420px at 100% 0%, var(--rps-accent-soft), transparent 50%),
+        var(--rps-bg);
+}
+
+.header {
+    background: color-mix(in srgb, var(--rps-surface) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rps-line);
+}
+
+.navbar {
+    background: color-mix(in srgb, var(--rps-surface) 92%, transparent);
+    border-right: 1px solid var(--rps-line);
+}
+
+.brand {
+    font-family: var(--rps-font-display);
+    letter-spacing: 0.02em;
+    color: var(--rps-ink);
+}

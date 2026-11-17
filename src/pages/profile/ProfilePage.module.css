@@ -1,0 +1,11 @@
+.page {
+    padding: clamp(0.5rem, 2vw, 1.5rem);
+    display: flex;
+    justify-content: center;
+}
+
+.card {
+    width: min(100%, 560px);
+    background: color-mix(in srgb, var(--rps-surface) 96%, transparent);
+    border: 1px solid var(--rps-line);
+}

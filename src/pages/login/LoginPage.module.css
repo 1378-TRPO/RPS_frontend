@@ -1,0 +1,23 @@
+.page {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+    background:
+        radial-gradient(900px 420px at 15% 0%, var(--rps-primary-soft), transparent 55%),
+        radial-gradient(700px 380px at 95% 10%, var(--rps-accent-soft), transparent 50%),
+        linear-gradient(165deg, var(--rps-bg) 0%, var(--rps-bg-soft) 100%);
+}
+
+.card {
+    width: min(100%, 420px);
+    background: color-mix(in srgb, var(--rps-surface) 94%, transparent);
+    border: 1px solid var(--rps-line);
+}
+
+.brand {
+    font-family: var(--rps-font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--rps-primary-ink);
+}
