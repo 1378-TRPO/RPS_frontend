@@ -16,8 +16,8 @@
 }
 
 .brand {
-    font-family: var(--rps-font-display);
+    font-family: var(--rps-font-sans);
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--rps-primary-ink);
 }

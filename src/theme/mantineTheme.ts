@@ -1,5 +1,7 @@
 import { createTheme, type MantineColorsTuple } from '@mantine/core';
 
+import { PasswordVisibilityIcon } from '@/components/PasswordVisibilityIcon';
+
 /** Пастельный dusty-teal, зеркало --rps-primary* */
 const mist: MantineColorsTuple = [
     '#f3f7f9',
@@ -34,10 +36,10 @@ export const mantineTheme = createTheme({
         mist,
         clay,
     },
-    fontFamily: "Outfit, 'Segoe UI', sans-serif",
+    fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif",
     fontFamilyMonospace: "ui-monospace, 'Cascadia Code', Consolas, monospace",
     headings: {
-        fontFamily: "'Source Serif 4', Georgia, serif",
+        fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif",
         fontWeight: '600',
         sizes: {
             h1: { fontSize: '2.25rem', lineHeight: '1.2' },
@@ -75,7 +77,15 @@ export const mantineTheme = createTheme({
         PasswordInput: {
             defaultProps: {
                 radius: 'md',
+                visibilityToggleIcon: PasswordVisibilityIcon,
+                rightSectionWidth: 36,
             },
+            vars: () => ({
+                root: {
+                    '--psi-icon-size': '16px',
+                    '--psi-button-size': '28px',
+                },
+            }),
         },
         Paper: {
             defaultProps: {

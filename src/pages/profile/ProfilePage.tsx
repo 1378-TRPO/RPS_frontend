@@ -1,4 +1,4 @@
-import { Alert, Button, Loader, Paper, Stack, Text, TextInput, Title } from '@mantine/core';
+import { Alert, Button, Loader, Paper, Stack, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconCheck, IconDeviceFloppy } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -8,16 +8,16 @@ import { useEffect, useState } from 'react';
 import { queryKeys } from '@/queries/keys';
 import { authService } from '@/services/authService';
 import {
-    buildProfileUpdatePayload,
     EMAIL_MAX_LENGTH,
-    hasNormalizedProfileChanges,
     NAME_MAX_LENGTH,
     PHONE_MAX_LENGTH,
-    type ProfileFormValues,
+    buildProfileUpdatePayload,
+    hasNormalizedProfileChanges,
     toFormValues,
     validateProfileEmail,
     validateProfileName,
     validateProfilePhone,
+    type ProfileFormValues,
 } from '@/utils/profileValidation';
 
 import styles from './ProfilePage.module.css';
@@ -138,9 +138,7 @@ export function ProfilePage() {
                     icon={<IconAlertCircle size={16} />}
                     maw={520}
                 >
-                    {status === 403
-                        ? 'Профиль доступен только роли client.'
-                        : 'Не удалось загрузить профиль.'}
+                    {status === 403 ? 'Доступно только клиентам' : 'Не удалось загрузить профиль'}
                 </Alert>
             </div>
         );
@@ -153,13 +151,7 @@ export function ProfilePage() {
         <div className={styles.page}>
             <Paper className={styles.card} p="xl" radius="lg" shadow="sm">
                 <Stack gap="lg">
-                    <div>
-                        <Title order={2}>Профиль</Title>
-                        <Text c="dimmed" size="sm" mt={6}>
-                            Имя, телефон и email. Пустые имя или телефон очищают поле. Пароль и роль
-                            здесь не меняются.
-                        </Text>
-                    </div>
+                    <Title order={2}>Профиль</Title>
 
                     {error ? (
                         <Alert
@@ -180,7 +172,7 @@ export function ProfilePage() {
                             onClose={() => setSaved(false)}
                             withCloseButton
                         >
-                            Сохранено. Если меняли email, следующий вход - с новым адресом.
+                            Сохранено
                         </Alert>
                     ) : null}
 
@@ -206,21 +198,18 @@ export function ProfilePage() {
                             <TextInput
                                 label="Имя"
                                 placeholder="Иван Петров"
-                                description={`До ${NAME_MAX_LENGTH} символов, можно очистить`}
                                 maxLength={NAME_MAX_LENGTH}
                                 {...form.getInputProps('name')}
                             />
                             <TextInput
                                 label="Телефон"
                                 placeholder="+79991234567"
-                                description="Формат +79991234567, без пробелов и скобок"
                                 maxLength={PHONE_MAX_LENGTH}
                                 {...form.getInputProps('phone')}
                             />
                             <TextInput
                                 label="Email"
                                 placeholder="client@example.com"
-                                description="Нельзя очистить; должен быть уникальным"
                                 maxLength={EMAIL_MAX_LENGTH}
                                 {...form.getInputProps('email')}
                             />
