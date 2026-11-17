@@ -17,6 +17,8 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import styles from '@/pages/auth/AuthPage.module.css';
+import { queryKeys } from '@/queries/keys';
+import { queryClient } from '@/queries/queryClient';
 import { authService } from '@/services/authService';
 import { normalizeEmail, validateEmail, validatePassword } from '@/utils/authValidation';
 
@@ -46,7 +48,8 @@ export function LoginPage() {
 
     const loginMutation = useMutation({
         mutationFn: authService.login,
-        onSuccess: () => {
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: queryKeys.me });
             navigate('/', { replace: true });
         },
         onError: (err: unknown) => {
@@ -72,7 +75,8 @@ export function LoginPage() {
                             Вход
                         </Title>
                         <Text c="dimmed" size="sm" mt={6}>
-                            Войдите в аккаунт клиента, механика или менеджера.
+                            Вход по email и паролю для ролей клиент, механик и менеджер. После входа
+                            выдается JWT access token.
                         </Text>
                     </div>
 
