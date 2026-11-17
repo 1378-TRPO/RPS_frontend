@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
@@ -17,6 +19,10 @@ export default defineConfig({
             '/users': { target: 'http://127.0.0.1:8000', changeOrigin: true },
             '/health': { target: 'http://127.0.0.1:8000', changeOrigin: true },
         },
+    },
+    test: {
+        environment: 'node',
+        include: ['src/**/*.test.ts'],
     },
     build: {
         rolldownOptions: {

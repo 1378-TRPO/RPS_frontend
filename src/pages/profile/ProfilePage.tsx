@@ -1,4 +1,4 @@
-import { Alert, Button, Paper, Stack, TextInput, Title } from '@mantine/core';
+import { Alert, Button, Loader, Paper, Stack, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconCheck, IconDeviceFloppy } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -7,10 +7,52 @@ import { useEffect, useState } from 'react';
 
 import { queryKeys } from '@/queries/keys';
 import { authService } from '@/services/authService';
+import {
+    EMAIL_MAX_LENGTH,
+    NAME_MAX_LENGTH,
+    PHONE_MAX_LENGTH,
+    buildProfileUpdatePayload,
+    hasNormalizedProfileChanges,
+    toFormValues,
+    validateProfileEmail,
+    validateProfileName,
+    validateProfilePhone,
+    type ProfileFormValues,
+} from '@/utils/profileValidation';
 
 import styles from './ProfilePage.module.css';
 
-const phonePattern = /^\+[1-9]\d{6,14}$/;
+const PROFILE_FIELDS = ['name', 'phone', 'email'] as const;
+
+function apply422FieldErrors(
+    err: unknown,
+    setFieldError: (field: (typeof PROFILE_FIELDS)[number], message: string) => void,
+): boolean {
+    if (!axios.isAxiosError(err) || err.response?.status !== 422) {
+        return false;
+    }
+
+    const detail = err.response.data?.detail;
+    if (!Array.isArray(detail)) {
+        return false;
+    }
+
+    let applied = false;
+    for (const item of detail) {
+        if (!item || typeof item !== 'object') continue;
+        const loc = 'loc' in item ? item.loc : undefined;
+        const msg = 'msg' in item ? item.msg : undefined;
+        if (!Array.isArray(loc) || typeof msg !== 'string') continue;
+
+        const field = loc[loc.length - 1];
+        if (field === 'name' || field === 'phone' || field === 'email') {
+            setFieldError(field, msg);
+            applied = true;
+        }
+    }
+
+    return applied;
+}
 
 export function ProfilePage() {
     const queryClient = useQueryClient();
@@ -23,36 +65,23 @@ export function ProfilePage() {
         retry: false,
     });
 
-    const form = useForm({
+    const form = useForm<ProfileFormValues>({
+        mode: 'controlled',
         initialValues: {
             name: '',
             phone: '',
             email: '',
         },
         validate: {
-            name: (value) => {
-                if (!value.trim()) return null;
-                return value.trim().length <= 100 ? null : 'Имя до 100 символов';
-            },
-            phone: (value) => {
-                if (!value.trim()) return null;
-                return phonePattern.test(value.trim())
-                    ? null
-                    : 'Формат: + и 7-15 цифр, например +79991234567';
-            },
-            email: (value) => (/^\S+@\S+\.\S+$/.test(value) ? null : 'Введите корректный email'),
+            name: validateProfileName,
+            phone: validateProfilePhone,
+            email: validateProfileEmail,
         },
     });
 
     useEffect(() => {
-        if (profileQuery.data) {
-            form.setValues({
-                name: profileQuery.data.name ?? '',
-                phone: profileQuery.data.phone ?? '',
-                email: profileQuery.data.email,
-            });
-        }
-        // form identity is stable enough; we sync when server data arrives
+        if (!profileQuery.data) return;
+        form.initialize(toFormValues(profileQuery.data));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profileQuery.data]);
 
@@ -60,11 +89,16 @@ export function ProfilePage() {
         mutationFn: authService.updateProfile,
         onSuccess: (data) => {
             queryClient.setQueryData(queryKeys.profile, data);
+            void queryClient.invalidateQueries({ queryKey: queryKeys.me });
             setSaved(true);
             setError(null);
         },
         onError: (err: unknown) => {
             setSaved(false);
+            if (apply422FieldErrors(err, form.setFieldError)) {
+                setError(null);
+                return;
+            }
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 409) {
                     setError('Этот email уже занят');
@@ -83,19 +117,35 @@ export function ProfilePage() {
         },
     });
 
-    if (profileQuery.isError) {
+    if (profileQuery.isLoading) {
+        return (
+            <div className={styles.page}>
+                <Loader color="mist" />
+            </div>
+        );
+    }
+
+    if (profileQuery.isError || !profileQuery.data) {
         const status = axios.isAxiosError(profileQuery.error)
             ? profileQuery.error.response?.status
             : undefined;
 
         return (
             <div className={styles.page}>
-                <Alert color="yellow" variant="light" icon={<IconAlertCircle size={16} />}>
+                <Alert
+                    color="yellow"
+                    variant="light"
+                    icon={<IconAlertCircle size={16} />}
+                    maw={520}
+                >
                     {status === 403 ? 'Доступно только клиентам' : 'Не удалось загрузить профиль'}
                 </Alert>
             </div>
         );
     }
+
+    const initial = toFormValues(profileQuery.data);
+    const hasChanges = hasNormalizedProfileChanges(form.values, initial);
 
     return (
         <div className={styles.page}>
@@ -104,12 +154,24 @@ export function ProfilePage() {
                     <Title order={2}>Профиль</Title>
 
                     {error ? (
-                        <Alert color="red" variant="light" icon={<IconAlertCircle size={16} />}>
+                        <Alert
+                            color="red"
+                            variant="light"
+                            icon={<IconAlertCircle size={16} />}
+                            onClose={() => setError(null)}
+                            withCloseButton
+                        >
                             {error}
                         </Alert>
                     ) : null}
                     {saved ? (
-                        <Alert color="teal" variant="light" icon={<IconCheck size={16} />}>
+                        <Alert
+                            color="teal"
+                            variant="light"
+                            icon={<IconCheck size={16} />}
+                            onClose={() => setSaved(false)}
+                            withCloseButton
+                        >
                             Сохранено
                         </Alert>
                     ) : null}
@@ -118,30 +180,37 @@ export function ProfilePage() {
                         onSubmit={form.onSubmit((values) => {
                             setSaved(false);
                             setError(null);
-                            updateMutation.mutate({
-                                name: values.name.trim() || null,
-                                phone: values.phone.trim() || null,
-                                email: values.email.trim().toLowerCase(),
-                            });
+
+                            const payload = buildProfileUpdatePayload(values, initial);
+                            if (
+                                payload.name === undefined &&
+                                payload.phone === undefined &&
+                                payload.email === undefined
+                            ) {
+                                setError('Нет изменений для сохранения');
+                                return;
+                            }
+
+                            updateMutation.mutate(payload);
                         })}
                     >
                         <Stack gap="md">
                             <TextInput
                                 label="Имя"
                                 placeholder="Иван Петров"
-                                disabled={profileQuery.isLoading}
+                                maxLength={NAME_MAX_LENGTH}
                                 {...form.getInputProps('name')}
                             />
                             <TextInput
                                 label="Телефон"
                                 placeholder="+79991234567"
-                                disabled={profileQuery.isLoading}
+                                maxLength={PHONE_MAX_LENGTH}
                                 {...form.getInputProps('phone')}
                             />
                             <TextInput
                                 label="Email"
                                 placeholder="client@example.com"
-                                disabled={profileQuery.isLoading}
+                                maxLength={EMAIL_MAX_LENGTH}
                                 {...form.getInputProps('email')}
                             />
                             <Button
@@ -149,6 +218,7 @@ export function ProfilePage() {
                                 loading={updateMutation.isPending}
                                 leftSection={<IconDeviceFloppy size={18} />}
                                 w={{ base: '100%', xs: 'auto' }}
+                                disabled={!hasChanges}
                             >
                                 Сохранить
                             </Button>
