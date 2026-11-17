@@ -3,15 +3,18 @@ import { useForm } from '@mantine/form';
 import { IconAlertCircle, IconCheck, IconDeviceFloppy } from '@tabler/icons-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { queryKeys } from '@/queries/keys';
-import { authService, type UpdateProfilePayload } from '@/services/authService';
+import { authService } from '@/services/authService';
 import {
+    buildProfileUpdatePayload,
+    EMAIL_MAX_LENGTH,
+    hasNormalizedProfileChanges,
     NAME_MAX_LENGTH,
-    normalizeProfileEmail,
-    normalizeProfileName,
-    normalizeProfilePhone,
+    PHONE_MAX_LENGTH,
+    type ProfileFormValues,
+    toFormValues,
     validateProfileEmail,
     validateProfileName,
     validateProfilePhone,
@@ -19,11 +22,37 @@ import {
 
 import styles from './ProfilePage.module.css';
 
-type ProfileFormValues = {
-    name: string;
-    phone: string;
-    email: string;
-};
+const PROFILE_FIELDS = ['name', 'phone', 'email'] as const;
+
+function apply422FieldErrors(
+    err: unknown,
+    setFieldError: (field: (typeof PROFILE_FIELDS)[number], message: string) => void,
+): boolean {
+    if (!axios.isAxiosError(err) || err.response?.status !== 422) {
+        return false;
+    }
+
+    const detail = err.response.data?.detail;
+    if (!Array.isArray(detail)) {
+        return false;
+    }
+
+    let applied = false;
+    for (const item of detail) {
+        if (!item || typeof item !== 'object') continue;
+        const loc = 'loc' in item ? item.loc : undefined;
+        const msg = 'msg' in item ? item.msg : undefined;
+        if (!Array.isArray(loc) || typeof msg !== 'string') continue;
+
+        const field = loc[loc.length - 1];
+        if (field === 'name' || field === 'phone' || field === 'email') {
+            setFieldError(field, msg);
+            applied = true;
+        }
+    }
+
+    return applied;
+}
 
 export function ProfilePage() {
     const queryClient = useQueryClient();
@@ -37,6 +66,7 @@ export function ProfilePage() {
     });
 
     const form = useForm<ProfileFormValues>({
+        mode: 'controlled',
         initialValues: {
             name: '',
             phone: '',
@@ -51,48 +81,24 @@ export function ProfilePage() {
 
     useEffect(() => {
         if (!profileQuery.data) return;
-        form.setValues({
-            name: profileQuery.data.name ?? '',
-            phone: profileQuery.data.phone ?? '',
-            email: profileQuery.data.email,
-        });
-        form.resetDirty({
-            name: profileQuery.data.name ?? '',
-            phone: profileQuery.data.phone ?? '',
-            email: profileQuery.data.email,
-        });
+        form.initialize(toFormValues(profileQuery.data));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [profileQuery.data]);
-
-    const initial = useMemo(() => {
-        if (!profileQuery.data) return null;
-        return {
-            name: profileQuery.data.name ?? '',
-            phone: profileQuery.data.phone ?? '',
-            email: profileQuery.data.email,
-        };
     }, [profileQuery.data]);
 
     const updateMutation = useMutation({
         mutationFn: authService.updateProfile,
-        onSuccess: async (data) => {
+        onSuccess: (data) => {
             queryClient.setQueryData(queryKeys.profile, data);
-            await queryClient.invalidateQueries({ queryKey: queryKeys.me });
-            form.setValues({
-                name: data.name ?? '',
-                phone: data.phone ?? '',
-                email: data.email,
-            });
-            form.resetDirty({
-                name: data.name ?? '',
-                phone: data.phone ?? '',
-                email: data.email,
-            });
+            void queryClient.invalidateQueries({ queryKey: queryKeys.me });
             setSaved(true);
             setError(null);
         },
         onError: (err: unknown) => {
             setSaved(false);
+            if (apply422FieldErrors(err, form.setFieldError)) {
+                setError(null);
+                return;
+            }
             if (axios.isAxiosError(err)) {
                 if (err.response?.status === 409) {
                     setError('Этот email уже занят');
@@ -104,10 +110,6 @@ export function ProfilePage() {
                 }
                 if (err.response?.status === 422) {
                     setError('Проверьте поля формы');
-                    return;
-                }
-                if (err.response?.status === 401) {
-                    setError('Сессия истекла. Войдите снова');
                     return;
                 }
             }
@@ -123,7 +125,7 @@ export function ProfilePage() {
         );
     }
 
-    if (profileQuery.isError) {
+    if (profileQuery.isError || !profileQuery.data) {
         const status = axios.isAxiosError(profileQuery.error)
             ? profileQuery.error.response?.status
             : undefined;
@@ -138,13 +140,14 @@ export function ProfilePage() {
                 >
                     {status === 403
                         ? 'Профиль доступен только роли client.'
-                        : status === 401
-                          ? 'Сессия истекла. Войдите снова.'
-                          : 'Не удалось загрузить профиль.'}
+                        : 'Не удалось загрузить профиль.'}
                 </Alert>
             </div>
         );
     }
+
+    const initial = toFormValues(profileQuery.data);
+    const hasChanges = hasNormalizedProfileChanges(form.values, initial);
 
     return (
         <div className={styles.page}>
@@ -186,27 +189,13 @@ export function ProfilePage() {
                             setSaved(false);
                             setError(null);
 
-                            const nextName = normalizeProfileName(values.name);
-                            const nextPhone = normalizeProfilePhone(values.phone);
-                            const nextEmail = normalizeProfileEmail(values.email);
-
-                            const payload: UpdateProfilePayload = {};
-                            if (!initial || nextName !== (initial.name.trim() || null)) {
-                                payload.name = nextName;
-                            }
-                            if (!initial || nextPhone !== (initial.phone.trim() || null)) {
-                                payload.phone = nextPhone;
-                            }
-                            if (!initial || nextEmail !== normalizeProfileEmail(initial.email)) {
-                                payload.email = nextEmail;
-                            }
-
+                            const payload = buildProfileUpdatePayload(values, initial);
                             if (
                                 payload.name === undefined &&
                                 payload.phone === undefined &&
                                 payload.email === undefined
                             ) {
-                                setError('Измените хотя бы одно поле');
+                                setError('Нет изменений для сохранения');
                                 return;
                             }
 
@@ -225,13 +214,14 @@ export function ProfilePage() {
                                 label="Телефон"
                                 placeholder="+79991234567"
                                 description="Формат +79991234567, без пробелов и скобок"
+                                maxLength={PHONE_MAX_LENGTH}
                                 {...form.getInputProps('phone')}
                             />
                             <TextInput
                                 label="Email"
                                 placeholder="client@example.com"
                                 description="Нельзя очистить; должен быть уникальным"
-                                maxLength={254}
+                                maxLength={EMAIL_MAX_LENGTH}
                                 {...form.getInputProps('email')}
                             />
                             <Button
@@ -239,7 +229,7 @@ export function ProfilePage() {
                                 loading={updateMutation.isPending}
                                 leftSection={<IconDeviceFloppy size={18} />}
                                 w={{ base: '100%', xs: 'auto' }}
-                                disabled={!form.isDirty()}
+                                disabled={!hasChanges}
                             >
                                 Сохранить
                             </Button>
