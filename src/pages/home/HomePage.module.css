@@ -1,0 +1,15 @@
+.page {
+    padding: clamp(0.5rem, 2vw, 1.5rem);
+}
+
+.eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rps-muted);
+    font-weight: 600;
+}
+
+.title {
+    color: var(--rps-ink);
+}

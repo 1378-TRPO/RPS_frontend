@@ -1,0 +1,77 @@
+/**
+ * Fog & Clay: единая пастельная палитра RPS.
+ * Все цвета UI берутся только отсюда (или через Mantine theme, который зеркалит эти токены).
+ */
+:root {
+    --rps-bg: #f3f6f8;
+    --rps-bg-soft: #e8eef2;
+    --rps-surface: #ffffff;
+    --rps-surface-raised: #fafbfc;
+    --rps-ink: #243040;
+    --rps-ink-soft: #3a4656;
+    --rps-muted: #6a7785;
+    --rps-line: #d5dee6;
+    --rps-line-strong: #b8c4d0;
+
+    --rps-primary: #7a9eb5;
+    --rps-primary-hover: #6a8ea5;
+    --rps-primary-pressed: #5a7f96;
+    --rps-primary-soft: #e4eef3;
+    --rps-primary-ink: #2f4a5a;
+
+    --rps-accent: #c4a992;
+    --rps-accent-soft: #f3ebe3;
+    --rps-accent-ink: #5c4636;
+
+    --rps-success: #7a9e8a;
+    --rps-success-soft: #e6f0ea;
+    --rps-warning: #c9b07a;
+    --rps-warning-soft: #f5efdf;
+    --rps-danger: #c97b84;
+    --rps-danger-soft: #f6e6e8;
+
+    --rps-shadow-sm: 0 1px 2px rgba(36, 48, 64, 0.04), 0 4px 12px rgba(36, 48, 64, 0.05);
+    --rps-shadow-md: 0 4px 10px rgba(36, 48, 64, 0.06), 0 18px 40px rgba(36, 48, 64, 0.08);
+    --rps-radius-sm: 10px;
+    --rps-radius-md: 16px;
+    --rps-radius-lg: 24px;
+
+    --rps-font-sans: 'Outfit', 'Segoe UI', sans-serif;
+    --rps-font-display: 'Source Serif 4', 'Georgia', serif;
+
+    color-scheme: light;
+}
+
+html[data-theme='dark'] {
+    --rps-bg: #141a20;
+    --rps-bg-soft: #1a222b;
+    --rps-surface: #1c242e;
+    --rps-surface-raised: #232c38;
+    --rps-ink: #e8eef3;
+    --rps-ink-soft: #c5d0db;
+    --rps-muted: #8f9caa;
+    --rps-line: #2e3a48;
+    --rps-line-strong: #3d4c5c;
+
+    --rps-primary: #8fb0c4;
+    --rps-primary-hover: #9ebccc;
+    --rps-primary-pressed: #7a9eb5;
+    --rps-primary-soft: #243540;
+    --rps-primary-ink: #d5e6ef;
+
+    --rps-accent: #d0b49c;
+    --rps-accent-soft: #3a3028;
+    --rps-accent-ink: #f0e4d8;
+
+    --rps-success: #8fb5a0;
+    --rps-success-soft: #24342c;
+    --rps-warning: #d4bd8c;
+    --rps-warning-soft: #3a3424;
+    --rps-danger: #d49199;
+    --rps-danger-soft: #3a282c;
+
+    --rps-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --rps-shadow-md: 0 4px 10px rgba(0, 0, 0, 0.35), 0 18px 40px rgba(0, 0, 0, 0.4);
+
+    color-scheme: dark;
+}
