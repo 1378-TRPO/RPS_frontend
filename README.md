@@ -68,6 +68,7 @@ npm run preview
 npm run typecheck
 npm run lint
 npm run format
+npm test
 npm run check
 ```
 

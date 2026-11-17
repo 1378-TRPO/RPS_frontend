@@ -10,6 +10,12 @@ import tseslint from 'typescript-eslint';
 export default defineConfig([
     globalIgnores(['dist']),
     {
+        files: ['**/*.test.ts'],
+        rules: {
+            'react-refresh/only-export-components': 'off',
+        },
+    },
+    {
         files: ['**/*.{ts,tsx}'],
         extends: [
             js.configs.recommended,
