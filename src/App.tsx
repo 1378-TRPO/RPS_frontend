@@ -11,6 +11,7 @@ import { HomePage } from '@/pages/home/HomePage';
 import { LoginPage } from '@/pages/login/LoginPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { RegisterPage } from '@/pages/register/RegisterPage';
+import { ServicesPage } from '@/pages/services/ServicesPage';
 import { mantineTheme } from '@/theme/mantineTheme';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { useTheme } from '@/theme/useTheme';
@@ -34,6 +35,7 @@ function ThemedApp() {
                             <Route element={<ClientOnlyRoute />}>
                                 <Route path="/profile" element={<ProfilePage />} />
                                 <Route path="/garage" element={<GaragePage />} />
+                                <Route path="/services" element={<ServicesPage />} />
                             </Route>
                         </Route>
                     </Route>
