@@ -6,6 +6,7 @@ import { AppShell } from '@/layout/AppShell';
 import { ClientOnlyRoute } from '@/layout/ClientOnlyRoute';
 import { ProtectedRoute } from '@/layout/ProtectedRoute';
 import { PublicOnlyRoute } from '@/layout/PublicOnlyRoute';
+import { GaragePage } from '@/pages/garage/GaragePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { LoginPage } from '@/pages/login/LoginPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
@@ -32,6 +33,7 @@ function ThemedApp() {
                             <Route path="/" element={<HomePage />} />
                             <Route element={<ClientOnlyRoute />}>
                                 <Route path="/profile" element={<ProfilePage />} />
+                                <Route path="/garage" element={<GaragePage />} />
                             </Route>
                         </Route>
                     </Route>
