@@ -5,6 +5,9 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+const spaHtmlBypass = (req: { headers: { accept?: string } }) =>
+    req.headers.accept?.includes('text/html') ? '/index.html' : undefined;
+
 export default defineConfig({
     plugins: [react()],
     resolve: {
@@ -17,8 +20,18 @@ export default defineConfig({
         proxy: {
             '/auth': { target: 'http://127.0.0.1:8000', changeOrigin: true },
             '/users': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-            '/services': { target: 'http://127.0.0.1:8000', changeOrigin: true },
-            '/manager': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+            '/services': {
+                target: 'http://127.0.0.1:8000',
+                changeOrigin: true,
+                // SPA-роут /services не должен уходить на API при F5 / прямом открытии
+                bypass: spaHtmlBypass,
+            },
+            '/manager': {
+                target: 'http://127.0.0.1:8000',
+                changeOrigin: true,
+                // SPA-роут /manager/* не должен уходить на API при F5 / прямом открытии
+                bypass: spaHtmlBypass,
+            },
             '/health': { target: 'http://127.0.0.1:8000', changeOrigin: true },
         },
     },

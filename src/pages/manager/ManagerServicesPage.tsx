@@ -53,7 +53,7 @@ const emptyFormValues: ServiceFormValues = {
 function toFormValues(service: ManagerService): ServiceFormValues {
     return {
         name: service.name,
-        description: service.description,
+        description: service.description ?? '',
         price: String(service.price),
         duration_minutes: String(service.duration_minutes),
     };
@@ -234,9 +234,11 @@ export function ManagerServicesPage() {
                                         >
                                             <Table.Td>
                                                 <Text fw={600}>{service.name}</Text>
-                                                <Text c="dimmed" size="sm" lineClamp={2}>
-                                                    {service.description}
-                                                </Text>
+                                                {service.description ? (
+                                                    <Text c="dimmed" size="sm" lineClamp={2}>
+                                                        {service.description}
+                                                    </Text>
+                                                ) : null}
                                             </Table.Td>
                                             <Table.Td>{formatServicePrice(service.price)}</Table.Td>
                                             <Table.Td>

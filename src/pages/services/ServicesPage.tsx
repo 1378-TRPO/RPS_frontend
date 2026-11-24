@@ -12,9 +12,11 @@ function ServiceCard({ service }: { service: Service }) {
         <Paper className={styles.card} p="lg" radius="lg" shadow="sm">
             <Stack gap="sm" h="100%">
                 <Title order={4}>{service.name}</Title>
-                <Text className={styles.description} size="sm">
-                    {service.description}
-                </Text>
+                {service.description ? (
+                    <Text className={styles.description} size="sm">
+                        {service.description}
+                    </Text>
+                ) : null}
                 <div className={styles.meta}>
                     <Text className={styles.metaItem}>{formatServicePrice(service.price)}</Text>
                     <Text c="dimmed" size="sm">
@@ -26,6 +28,61 @@ function ServiceCard({ service }: { service: Service }) {
     );
 }
 
+function ServiceList({
+    services,
+    isLoading,
+    isError,
+    onRetry,
+}: {
+    services: Service[] | undefined;
+    isLoading: boolean;
+    isError: boolean;
+    onRetry: () => void;
+}) {
+    if (isLoading) {
+        return (
+            <Center py="xl">
+                <Loader color="mist" />
+            </Center>
+        );
+    }
+
+    if (isError) {
+        return (
+            <Stack gap="sm">
+                <Alert color="yellow" variant="light" icon={<IconAlertCircle size={16} />}>
+                    Не удалось загрузить каталог услуг.
+                </Alert>
+                <Button
+                    variant="light"
+                    color="mist"
+                    leftSection={<IconRefresh size={16} />}
+                    onClick={onRetry}
+                    w={{ base: '100%', xs: 'auto' }}
+                >
+                    Повторить
+                </Button>
+            </Stack>
+        );
+    }
+
+    if (!services || services.length === 0) {
+        return (
+            <Text c="dimmed" size="sm">
+                Пока нет доступных услуг.
+            </Text>
+        );
+    }
+
+    return (
+        <div className={styles.grid}>
+            {services.map((service) => (
+                <ServiceCard key={service.id} service={service} />
+            ))}
+        </div>
+    );
+}
+
 export function ServicesPage() {
     const servicesQuery = useServices();
 
@@ -34,48 +91,14 @@ export function ServicesPage() {
             <Stack className={styles.layout} gap="lg">
                 <Title order={2}>Услуги</Title>
 
-                {servicesQuery.isLoading ? (
-                    <Center py="xl">
-                        <Loader color="mist" />
-                    </Center>
-                ) : null}
-
-                {servicesQuery.isError ? (
-                    <Stack gap="sm">
-                        <Alert color="yellow" variant="light" icon={<IconAlertCircle size={16} />}>
-                            Не удалось загрузить каталог услуг.
-                        </Alert>
-                        <Button
-                            variant="light"
-                            color="mist"
-                            leftSection={<IconRefresh size={16} />}
-                            onClick={() => {
-                                void servicesQuery.refetch();
-                            }}
-                            w={{ base: '100%', xs: 'auto' }}
-                        >
-                            Повторить
-                        </Button>
-                    </Stack>
-                ) : null}
-
-                {!servicesQuery.isLoading &&
-                !servicesQuery.isError &&
-                (servicesQuery.data?.length ?? 0) === 0 ? (
-                    <Text c="dimmed" size="sm">
-                        Пока нет доступных услуг.
-                    </Text>
-                ) : null}
-
-                {!servicesQuery.isLoading &&
-                !servicesQuery.isError &&
-                (servicesQuery.data?.length ?? 0) > 0 ? (
-                    <div className={styles.grid}>
-                        {servicesQuery.data?.map((service) => (
-                            <ServiceCard key={service.id} service={service} />
-                        ))}
-                    </div>
-                ) : null}
+                <ServiceList
+                    services={servicesQuery.data}
+                    isLoading={servicesQuery.isLoading}
+                    isError={servicesQuery.isError}
+                    onRetry={() => {
+                        void servicesQuery.refetch();
+                    }}
+                />
             </Stack>
         </div>
     );
