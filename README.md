@@ -40,7 +40,7 @@
 - Вход по JWT для ролей client / mechanic / manager (`/login` → `POST /auth/login`)
 - Текущая учетка и актуальная роль из `/auth/me`
 - Профиль клиента: имя, телефон, email (`GET/PATCH /users/me`, только client)
-- Гараж клиента: форма добавления автомобиля (`POST /users/me/vehicles`, только client)
+- Гараж клиента: список и форма добавления автомобиля (`GET/POST /users/me/vehicles`, только client)
 - Светлая/темная тема через `data-theme` (system / light / dark)
 - Адаптивный кабинет (desktop + mobile navbar)
 
