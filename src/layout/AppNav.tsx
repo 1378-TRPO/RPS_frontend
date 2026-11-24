@@ -1,5 +1,5 @@
 import { NavLink as MantineNavLink, Stack, Text } from '@mantine/core';
-import { IconCarGarage, IconHome, IconLogout, IconUser } from '@tabler/icons-react';
+import { IconCarGarage, IconHome, IconLogout, IconTools, IconUser } from '@tabler/icons-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import { queryClient } from '@/queries/queryClient';
@@ -39,6 +39,13 @@ export function AppNav({ onNavigate }: AppNavProps) {
                             to="/garage"
                             label="Гараж"
                             leftSection={<IconCarGarage size={18} stroke={1.6} />}
+                            onClick={onNavigate}
+                        />
+                        <MantineNavLink
+                            component={NavLink}
+                            to="/services"
+                            label="Услуги"
+                            leftSection={<IconTools size={18} stroke={1.6} />}
                             onClick={onNavigate}
                         />
                         <MantineNavLink
