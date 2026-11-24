@@ -7,6 +7,7 @@ import axios from 'axios';
 import { useState } from 'react';
 
 import { vehicleService } from '@/services/vehicleService';
+import { apply422FieldErrors } from '@/utils/apply422FieldErrors';
 import {
     currentMaxVehicleYear,
     MAKE_MAX_LENGTH,
@@ -24,36 +25,6 @@ import {
 import styles from './GaragePage.module.css';
 
 const VEHICLE_FIELDS = ['make', 'model', 'year', 'plate'] as const;
-
-function apply422FieldErrors(
-    err: unknown,
-    setFieldError: (field: (typeof VEHICLE_FIELDS)[number], message: string) => void,
-): boolean {
-    if (!axios.isAxiosError(err) || err.response?.status !== 422) {
-        return false;
-    }
-
-    const detail = err.response.data?.detail;
-    if (!Array.isArray(detail)) {
-        return false;
-    }
-
-    let applied = false;
-    for (const item of detail) {
-        if (!item || typeof item !== 'object') continue;
-        const loc = 'loc' in item ? item.loc : undefined;
-        const msg = 'msg' in item ? item.msg : undefined;
-        if (!Array.isArray(loc) || typeof msg !== 'string') continue;
-
-        const field = loc[loc.length - 1];
-        if (field === 'make' || field === 'model' || field === 'year' || field === 'plate') {
-            setFieldError(field, msg);
-            applied = true;
-        }
-    }
-
-    return applied;
-}
 
 export function GaragePage() {
     const [error, setError] = useState<string | null>(null);
@@ -87,7 +58,7 @@ export function GaragePage() {
             });
         },
         onError: (err: unknown) => {
-            if (apply422FieldErrors(err, form.setFieldError)) {
+            if (apply422FieldErrors(err, VEHICLE_FIELDS, form.setFieldError)) {
                 setError(null);
                 return;
             }
@@ -148,20 +119,15 @@ export function GaragePage() {
                                 placeholder="2018"
                                 allowDecimal={false}
                                 allowNegative={false}
-                                clampBehavior="strict"
+                                clampBehavior="none"
                                 min={YEAR_MIN}
                                 max={maxYear}
                                 hideControls
-                                value={
-                                    form.values.year === '' ? undefined : Number(form.values.year)
-                                }
+                                value={form.values.year}
                                 error={form.errors.year}
-                                onChange={(value) => {
-                                    form.setFieldValue(
-                                        'year',
-                                        value === '' || value === undefined ? '' : String(value),
-                                    );
-                                }}
+                                onChange={(value) =>
+                                    form.setFieldValue('year', String(value ?? ''))
+                                }
                                 onBlur={() => form.validateField('year')}
                             />
                             <TextInput

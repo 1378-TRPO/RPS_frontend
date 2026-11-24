@@ -16,29 +16,30 @@ export function currentMaxVehicleYear(now = new Date()): number {
 
 export function validateRequiredText(
     value: string,
-    label: string,
+    requiredLabel: string,
+    lengthLabel: string,
     maxLength: number,
 ): string | null {
     const trimmed = value.trim();
     if (!trimmed) {
-        return `Укажите ${label}`;
+        return `Укажите ${requiredLabel}`;
     }
     if (trimmed.length > maxLength) {
-        return `${label}: до ${maxLength} символов`;
+        return `${lengthLabel}: до ${maxLength} символов`;
     }
     return null;
 }
 
 export function validateVehicleMake(value: string): string | null {
-    return validateRequiredText(value, 'марку', MAKE_MAX_LENGTH);
+    return validateRequiredText(value, 'марку', 'Марка', MAKE_MAX_LENGTH);
 }
 
 export function validateVehicleModel(value: string): string | null {
-    return validateRequiredText(value, 'модель', MODEL_MAX_LENGTH);
+    return validateRequiredText(value, 'модель', 'Модель', MODEL_MAX_LENGTH);
 }
 
 export function validateVehiclePlate(value: string): string | null {
-    return validateRequiredText(value, 'госномер', PLATE_MAX_LENGTH);
+    return validateRequiredText(value, 'госномер', 'Госномер', PLATE_MAX_LENGTH);
 }
 
 export function validateVehicleYear(value: string, now = new Date()): string | null {
