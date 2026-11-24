@@ -42,6 +42,7 @@
 - Профиль клиента: имя, телефон, email (`GET/PATCH /users/me`, только client)
 - Гараж клиента: список и форма добавления автомобиля (`GET/POST /users/me/vehicles`, только client)
 - Каталог услуг для клиента (`GET /services`, только client)
+- Управление каталогом менеджером (`/manager/services`, soft-delete)
 - Светлая/темная тема через `data-theme` (system / light / dark)
 - Адаптивный кабинет (desktop + mobile navbar)
 
@@ -59,7 +60,7 @@ npm run dev
 - Backend Swagger: http://127.0.0.1:8000/docs
 
 В `.env` поле `VITE_API_BASE_URL` можно оставить пустым: в dev Vite проксирует
-`/auth`, `/users`, `/services`, `/health` на backend.
+`/auth`, `/users`, `/services`, `/manager`, `/health` на backend.
 
 ## Команды
 
