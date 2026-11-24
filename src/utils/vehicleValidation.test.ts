@@ -11,12 +11,18 @@ import {
 
 describe('vehicleValidation', () => {
     it('requires make, model and plate after trim', () => {
-        expect(validateVehicleMake('   ')).not.toBeNull();
-        expect(validateVehicleModel('')).not.toBeNull();
-        expect(validateVehiclePlate('  ')).not.toBeNull();
+        expect(validateVehicleMake('   ')).toBe('Укажите марку');
+        expect(validateVehicleModel('')).toBe('Укажите модель');
+        expect(validateVehiclePlate('  ')).toBe('Укажите госномер');
         expect(validateVehicleMake('Toyota')).toBeNull();
         expect(validateVehicleModel('Camry')).toBeNull();
         expect(validateVehiclePlate('A123BC77')).toBeNull();
+    });
+
+    it('uses a proper label for length errors', () => {
+        expect(validateVehicleMake('x'.repeat(101))).toBe('Марка: до 100 символов');
+        expect(validateVehicleModel('x'.repeat(101))).toBe('Модель: до 100 символов');
+        expect(validateVehiclePlate('x'.repeat(33))).toBe('Госномер: до 32 символов');
     });
 
     it('accepts integer years in range', () => {
