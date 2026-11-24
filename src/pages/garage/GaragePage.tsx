@@ -1,12 +1,26 @@
-import { Alert, Button, NumberInput, Paper, Stack, TextInput, Title } from '@mantine/core';
+import {
+    Alert,
+    Button,
+    Center,
+    Loader,
+    NumberInput,
+    Paper,
+    Stack,
+    Text,
+    TextInput,
+    Title,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
-import { IconAlertCircle, IconCar } from '@tabler/icons-react';
-import { useMutation } from '@tanstack/react-query';
+import { IconAlertCircle, IconCar, IconRefresh } from '@tabler/icons-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useState } from 'react';
 
+import { queryKeys } from '@/queries/keys';
+import { useVehicles } from '@/queries/useVehicles';
 import { vehicleService } from '@/services/vehicleService';
+import type { Vehicle } from '@/types/vehicle';
 import {
     currentMaxVehicleYear,
     MAKE_MAX_LENGTH,
@@ -55,7 +69,72 @@ function apply422FieldErrors(
     return applied;
 }
 
+function VehicleList({
+    vehicles,
+    isLoading,
+    isError,
+    onRetry,
+}: {
+    vehicles: Vehicle[] | undefined;
+    isLoading: boolean;
+    isError: boolean;
+    onRetry: () => void;
+}) {
+    if (isLoading) {
+        return (
+            <Center py="md">
+                <Loader color="mist" />
+            </Center>
+        );
+    }
+
+    if (isError) {
+        return (
+            <Stack gap="sm">
+                <Alert color="yellow" variant="light" icon={<IconAlertCircle size={16} />}>
+                    Не удалось загрузить список автомобилей.
+                </Alert>
+                <Button
+                    variant="light"
+                    color="mist"
+                    leftSection={<IconRefresh size={16} />}
+                    onClick={onRetry}
+                    w={{ base: '100%', xs: 'auto' }}
+                >
+                    Повторить
+                </Button>
+            </Stack>
+        );
+    }
+
+    if (!vehicles || vehicles.length === 0) {
+        return (
+            <Text c="dimmed" size="sm">
+                Пока нет автомобилей. Добавьте первый формой ниже.
+            </Text>
+        );
+    }
+
+    return (
+        <div>
+            {vehicles.map((vehicle) => (
+                <div key={vehicle.id} className={styles.vehicleRow}>
+                    <div>
+                        <Text fw={600}>
+                            {vehicle.make} {vehicle.model}
+                        </Text>
+                        <Text className={styles.vehicleMeta}>{vehicle.year}</Text>
+                    </div>
+                    <Text className={styles.vehiclePlate}>{vehicle.plate}</Text>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export function GaragePage() {
+    const queryClient = useQueryClient();
+    const vehiclesQuery = useVehicles();
     const [error, setError] = useState<string | null>(null);
     const maxYear = currentMaxVehicleYear();
 
@@ -77,13 +156,14 @@ export function GaragePage() {
 
     const createMutation = useMutation({
         mutationFn: vehicleService.createVehicle,
-        onSuccess: () => {
+        onSuccess: async () => {
             setError(null);
             form.reset();
+            await queryClient.invalidateQueries({ queryKey: queryKeys.vehicles });
             notifications.show({
                 color: 'teal',
                 title: 'Автомобиль добавлен',
-                message: 'Можно добавить еще один.',
+                message: 'Список обновлен.',
             });
         },
         onError: (err: unknown) => {
@@ -107,81 +187,103 @@ export function GaragePage() {
 
     return (
         <div className={styles.page}>
-            <Paper className={styles.card} p="xl" radius="lg" shadow="sm">
-                <Stack gap="lg">
-                    <Title order={2}>Гараж</Title>
+            <Stack className={styles.layout} gap="lg">
+                <Title order={2}>Гараж</Title>
 
-                    {error ? (
-                        <Alert
-                            color="red"
-                            variant="light"
-                            icon={<IconAlertCircle size={16} />}
-                            onClose={() => setError(null)}
-                            withCloseButton
-                        >
-                            {error}
-                        </Alert>
-                    ) : null}
+                <Paper className={styles.card} p="xl" radius="lg" shadow="sm">
+                    <Stack gap="md">
+                        <Title order={4}>Мои автомобили</Title>
+                        <VehicleList
+                            vehicles={vehiclesQuery.data}
+                            isLoading={vehiclesQuery.isLoading}
+                            isError={vehiclesQuery.isError}
+                            onRetry={() => {
+                                void vehiclesQuery.refetch();
+                            }}
+                        />
+                    </Stack>
+                </Paper>
 
-                    <form
-                        onSubmit={form.onSubmit((values) => {
-                            if (createMutation.isPending) return;
-                            setError(null);
-                            createMutation.mutate(toCreateVehiclePayload(values));
-                        })}
-                    >
-                        <Stack gap="md">
-                            <TextInput
-                                label="Марка"
-                                placeholder="Toyota"
-                                maxLength={MAKE_MAX_LENGTH}
-                                {...form.getInputProps('make')}
-                            />
-                            <TextInput
-                                label="Модель"
-                                placeholder="Camry"
-                                maxLength={MODEL_MAX_LENGTH}
-                                {...form.getInputProps('model')}
-                            />
-                            <NumberInput
-                                label="Год"
-                                placeholder="2018"
-                                allowDecimal={false}
-                                allowNegative={false}
-                                clampBehavior="strict"
-                                min={YEAR_MIN}
-                                max={maxYear}
-                                hideControls
-                                value={
-                                    form.values.year === '' ? undefined : Number(form.values.year)
-                                }
-                                error={form.errors.year}
-                                onChange={(value) => {
-                                    form.setFieldValue(
-                                        'year',
-                                        value === '' || value === undefined ? '' : String(value),
-                                    );
-                                }}
-                                onBlur={() => form.validateField('year')}
-                            />
-                            <TextInput
-                                label="Госномер"
-                                placeholder="A123BC77"
-                                maxLength={PLATE_MAX_LENGTH}
-                                {...form.getInputProps('plate')}
-                            />
-                            <Button
-                                type="submit"
-                                loading={createMutation.isPending}
-                                leftSection={<IconCar size={18} />}
-                                w={{ base: '100%', xs: 'auto' }}
+                <Paper className={styles.card} p="xl" radius="lg" shadow="sm">
+                    <Stack gap="lg">
+                        <Title order={4}>Добавить автомобиль</Title>
+
+                        {error ? (
+                            <Alert
+                                color="red"
+                                variant="light"
+                                icon={<IconAlertCircle size={16} />}
+                                onClose={() => setError(null)}
+                                withCloseButton
                             >
-                                Добавить автомобиль
-                            </Button>
-                        </Stack>
-                    </form>
-                </Stack>
-            </Paper>
+                                {error}
+                            </Alert>
+                        ) : null}
+
+                        <form
+                            onSubmit={form.onSubmit((values) => {
+                                if (createMutation.isPending) return;
+                                setError(null);
+                                createMutation.mutate(toCreateVehiclePayload(values));
+                            })}
+                        >
+                            <Stack gap="md">
+                                <TextInput
+                                    label="Марка"
+                                    placeholder="Toyota"
+                                    maxLength={MAKE_MAX_LENGTH}
+                                    {...form.getInputProps('make')}
+                                />
+                                <TextInput
+                                    label="Модель"
+                                    placeholder="Camry"
+                                    maxLength={MODEL_MAX_LENGTH}
+                                    {...form.getInputProps('model')}
+                                />
+                                <NumberInput
+                                    label="Год"
+                                    placeholder="2018"
+                                    allowDecimal={false}
+                                    allowNegative={false}
+                                    clampBehavior="strict"
+                                    min={YEAR_MIN}
+                                    max={maxYear}
+                                    hideControls
+                                    value={
+                                        form.values.year === ''
+                                            ? undefined
+                                            : Number(form.values.year)
+                                    }
+                                    error={form.errors.year}
+                                    onChange={(value) => {
+                                        form.setFieldValue(
+                                            'year',
+                                            value === '' || value === undefined
+                                                ? ''
+                                                : String(value),
+                                        );
+                                    }}
+                                    onBlur={() => form.validateField('year')}
+                                />
+                                <TextInput
+                                    label="Госномер"
+                                    placeholder="A123BC77"
+                                    maxLength={PLATE_MAX_LENGTH}
+                                    {...form.getInputProps('plate')}
+                                />
+                                <Button
+                                    type="submit"
+                                    loading={createMutation.isPending}
+                                    leftSection={<IconCar size={18} />}
+                                    w={{ base: '100%', xs: 'auto' }}
+                                >
+                                    Добавить автомобиль
+                                </Button>
+                            </Stack>
+                        </form>
+                    </Stack>
+                </Paper>
+            </Stack>
         </div>
     );
 }
