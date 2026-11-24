@@ -7,52 +7,23 @@ import { useEffect, useState } from 'react';
 
 import { queryKeys } from '@/queries/keys';
 import { authService } from '@/services/authService';
+import { apply422FieldErrors } from '@/utils/apply422FieldErrors';
 import {
+    buildProfileUpdatePayload,
     EMAIL_MAX_LENGTH,
+    hasNormalizedProfileChanges,
     NAME_MAX_LENGTH,
     PHONE_MAX_LENGTH,
-    buildProfileUpdatePayload,
-    hasNormalizedProfileChanges,
+    type ProfileFormValues,
     toFormValues,
     validateProfileEmail,
     validateProfileName,
     validateProfilePhone,
-    type ProfileFormValues,
 } from '@/utils/profileValidation';
 
 import styles from './ProfilePage.module.css';
 
 const PROFILE_FIELDS = ['name', 'phone', 'email'] as const;
-
-function apply422FieldErrors(
-    err: unknown,
-    setFieldError: (field: (typeof PROFILE_FIELDS)[number], message: string) => void,
-): boolean {
-    if (!axios.isAxiosError(err) || err.response?.status !== 422) {
-        return false;
-    }
-
-    const detail = err.response.data?.detail;
-    if (!Array.isArray(detail)) {
-        return false;
-    }
-
-    let applied = false;
-    for (const item of detail) {
-        if (!item || typeof item !== 'object') continue;
-        const loc = 'loc' in item ? item.loc : undefined;
-        const msg = 'msg' in item ? item.msg : undefined;
-        if (!Array.isArray(loc) || typeof msg !== 'string') continue;
-
-        const field = loc[loc.length - 1];
-        if (field === 'name' || field === 'phone' || field === 'email') {
-            setFieldError(field, msg);
-            applied = true;
-        }
-    }
-
-    return applied;
-}
 
 export function ProfilePage() {
     const queryClient = useQueryClient();
@@ -95,7 +66,7 @@ export function ProfilePage() {
         },
         onError: (err: unknown) => {
             setSaved(false);
-            if (apply422FieldErrors(err, form.setFieldError)) {
+            if (apply422FieldErrors(err, PROFILE_FIELDS, form.setFieldError)) {
                 setError(null);
                 return;
             }
