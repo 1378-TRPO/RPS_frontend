@@ -4,11 +4,13 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
 import { AppShell } from '@/layout/AppShell';
 import { ClientOnlyRoute } from '@/layout/ClientOnlyRoute';
+import { ManagerOnlyRoute } from '@/layout/ManagerOnlyRoute';
 import { ProtectedRoute } from '@/layout/ProtectedRoute';
 import { PublicOnlyRoute } from '@/layout/PublicOnlyRoute';
 import { GaragePage } from '@/pages/garage/GaragePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { LoginPage } from '@/pages/login/LoginPage';
+import { ManagerServicesPage } from '@/pages/manager/ManagerServicesPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import { RegisterPage } from '@/pages/register/RegisterPage';
 import { ServicesPage } from '@/pages/services/ServicesPage';
@@ -36,6 +38,9 @@ function ThemedApp() {
                                 <Route path="/profile" element={<ProfilePage />} />
                                 <Route path="/garage" element={<GaragePage />} />
                                 <Route path="/services" element={<ServicesPage />} />
+                            </Route>
+                            <Route element={<ManagerOnlyRoute />}>
+                                <Route path="/manager/services" element={<ManagerServicesPage />} />
                             </Route>
                         </Route>
                     </Route>

@@ -1,5 +1,12 @@
 import { NavLink as MantineNavLink, Stack, Text } from '@mantine/core';
-import { IconCarGarage, IconHome, IconLogout, IconTools, IconUser } from '@tabler/icons-react';
+import {
+    IconCarGarage,
+    IconClipboardList,
+    IconHome,
+    IconLogout,
+    IconTools,
+    IconUser,
+} from '@tabler/icons-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import { queryClient } from '@/queries/queryClient';
@@ -15,6 +22,7 @@ export function AppNav({ onNavigate }: AppNavProps) {
     const navigate = useNavigate();
     const { data: me } = useMe();
     const isClient = me?.role === 'client';
+    const isManager = me?.role === 'manager';
 
     const handleLogout = () => {
         authService.logout();
@@ -56,6 +64,15 @@ export function AppNav({ onNavigate }: AppNavProps) {
                             onClick={onNavigate}
                         />
                     </>
+                ) : null}
+                {isManager ? (
+                    <MantineNavLink
+                        component={NavLink}
+                        to="/manager/services"
+                        label="Каталог"
+                        leftSection={<IconClipboardList size={18} stroke={1.6} />}
+                        onClick={onNavigate}
+                    />
                 ) : null}
             </Stack>
 

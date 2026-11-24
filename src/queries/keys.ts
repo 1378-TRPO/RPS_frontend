@@ -3,4 +3,5 @@ export const queryKeys = {
     profile: ['users', 'me'] as const,
     vehicles: ['users', 'me', 'vehicles'] as const,
     services: ['services'] as const,
+    managerServices: ['manager', 'services'] as const,
 };

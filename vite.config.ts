@@ -18,6 +18,7 @@ export default defineConfig({
             '/auth': { target: 'http://127.0.0.1:8000', changeOrigin: true },
             '/users': { target: 'http://127.0.0.1:8000', changeOrigin: true },
             '/services': { target: 'http://127.0.0.1:8000', changeOrigin: true },
+            '/manager': { target: 'http://127.0.0.1:8000', changeOrigin: true },
             '/health': { target: 'http://127.0.0.1:8000', changeOrigin: true },
         },
     },
